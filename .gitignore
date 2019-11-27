@@ -48,7 +48,6 @@ log.txt
 .versions/
 coverage/
 www/
-dist/
 node_modules/
 tmp/
 temp/
