@@ -3,10 +3,11 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CandidatesModule } from './components/candidates/candidates.module';
+import env from './env';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost/vws', {
+    MongooseModule.forRoot(env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true
     }),
