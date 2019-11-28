@@ -22,4 +22,9 @@ export class CandidatesController {
   async getAll(): Promise<Candidate[]> {
     return this.candidatesService.getAll();
   }
+
+  @Get('getRandom')
+  async getRandom(): Promise<Candidate> {
+    return this.candidatesService.getRandom();
+  }
 }

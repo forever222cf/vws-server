@@ -8,13 +8,28 @@ import { CreateCandidateDto } from './dto/create-candidate.dto';
 export class CandidatesService {
   constructor(@InjectModel('candidate') private readonly candidateModel: Model<Candidate>) {}
 
+  _getRandomInt (min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min;
+  }
+
   async create(createCandidateDto: CreateCandidateDto) {
-    const createdCandidate = new this.candidateModel({
-      ...createCandidateDto,
-      code: '0'
-    });
-    // Check if phone number is exist
     try {
+      // Generate code
+      let code = this._getRandomInt(1000, 9999);
+      let isCodeExist = true;
+
+      while(isCodeExist) {
+        isCodeExist = await this.candidateModel.exists({ code: code });
+      }
+
+      let createdCandidate = new this.candidateModel({
+        ...createCandidateDto,
+        code: code
+      });
+
+      // Check if phone number is exist
       let isPhoneExist = await this.candidateModel.exists({ phone: createCandidateDto.phone });
       let isEmailExist = await this.candidateModel.exists({ email: createCandidateDto.email });
 
@@ -33,5 +48,13 @@ export class CandidatesService {
 
   async getAll(): Promise<Candidate[]> {
     return await this.candidateModel.find().exec();
+  }
+
+  async getRandom(): Promise<Candidate> {
+    let all = await this.getAll();
+    let selectedIdx = this._getRandomInt(0, all.length - 1);
+    let selectedCandidate = all[selectedIdx];
+
+    return selectedCandidate;
   }
 }
