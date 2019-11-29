@@ -70,7 +70,7 @@ export class CandidatesService {
 
   async getRandom(): Promise<Candidate> {
     let allCandidates = await this.getAll();
-    let selectedIdx = this._getRandomInt(0, allCandidates.length - 1);
+    let selectedIdx = this._getRandomInt(0, allCandidates.length);
     let selectedCandidate = allCandidates[selectedIdx];
 
     return selectedCandidate;
