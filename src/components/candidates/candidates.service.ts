@@ -1,5 +1,5 @@
 import { Model } from 'mongoose';
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Candidate } from './interfaces/candidate.interface';
 import { CreateCandidateDto } from './dto/create-candidate.dto';
@@ -17,13 +17,31 @@ export class CandidatesService {
   async create(createCandidateDto: CreateCandidateDto) {
     try {
       // Generate code
-      let code = this._getRandomInt(1000, 9999);
+      let code: string;
       let isCodeExist = true;
+      let whileBoundary = 0;
+      let isOutOfCode = false;
+      let allCandidates = await this.getAll();
 
-      while(isCodeExist) {
-        isCodeExist = await this.candidateModel.exists({ code: code });
+      do {
+        code = this._getRandomInt(1e3, 1e4).toString();
+        if (!allCandidates.find(x => x.code === code)) {
+          isCodeExist = false;
+        }
+
+        whileBoundary++;
+        if (whileBoundary > 100) {
+          isOutOfCode = true;
+          break;
+        }
+      } while(isCodeExist);
+
+      // No more code avaiable
+      if (isOutOfCode) {
+        return Promise.reject('No more code available!');
       }
 
+      // Create candidate
       let createdCandidate = new this.candidateModel({
         ...createCandidateDto,
         code: code
@@ -51,9 +69,9 @@ export class CandidatesService {
   }
 
   async getRandom(): Promise<Candidate> {
-    let all = await this.getAll();
-    let selectedIdx = this._getRandomInt(0, all.length - 1);
-    let selectedCandidate = all[selectedIdx];
+    let allCandidates = await this.getAll();
+    let selectedIdx = this._getRandomInt(0, allCandidates.length - 1);
+    let selectedCandidate = allCandidates[selectedIdx];
 
     return selectedCandidate;
   }
